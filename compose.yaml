@@ -1,0 +1,8 @@
+services:
+  bazhe-dev:
+    image: bazhe.dev
+    container_name: bazhe.dev
+    build: .
+    ports:
+      - "8765:5678"
+    restart: unless-stopped
