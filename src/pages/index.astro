@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { buttonVariants } from '@/components/ui/button.tsx';
 import { cn } from '@/lib/utils.ts';
-import { Github, Mail, MapPin, Calendar, GraduationCap } from 'lucide-react';
+import { Github, Mail, MapPin, Calendar, GraduationCap, Globe } from 'lucide-react';
 
 const age = new Date().getFullYear() - 2002 - (new Date().getMonth() < 2 || (new Date().getMonth() === 2 && new Date().getDate() < 29) ? 1 : 0);
 
@@ -11,6 +11,34 @@ const buttonClasses = cn(
   buttonVariants({ variant: "outline" }),
   "w-full bg-gray-700/50 border-gray-600 text-white hover:bg-gray-600 flex items-center gap-2"
 );
+
+interface Service {
+  id: string;
+  MONITOR_LABEL: string;
+  SERVICE_NAME: string;
+  SERVICE_DESCRIPTION: string;
+  SERVICE_TYPE: string;
+  SERVICE_DOMAIN: string;
+  status: string;
+}
+
+const apiUrl = import.meta.env.PUBLIC_API_URL || "http://localhost:7000";
+
+let services: Service[] = [];
+try {
+  const response = await fetch(`${apiUrl}/services`);
+  if (response.ok) {
+    services = await response.json();
+  } else {
+    console.error(
+      "Failed to fetch services:",
+      response.status,
+      response.statusText
+    );
+  }
+} catch (error) {
+  console.error("Error fetching services:", error);
+}
 ---
 
 <Layout title="bazhe.dev">
@@ -19,46 +47,75 @@ const buttonClasses = cn(
       <div class="grid-background"></div>
     </div>
 
-    <Card className="relative z-10 bg-gray-800/80 border-gray-700 backdrop-blur-sm max-w-md w-full" client:load>
-      <CardContent className="p-8 text-center space-y-6">
-        <div>
-          <h1 class="text-3xl font-bold text-white mb-2">Blagojche Dimov</h1>
-          <div class="flex items-center justify-center gap-2 text-gray-300">
-            <GraduationCap className="h-4 w-4" />
-            <span class="text-sm">Computer Science Student</span>
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <div class="flex items-center gap-3 text-gray-300">
-            <MapPin className="h-4 w-4 text-blue-400" />
-            <span class="text-sm">FCSE, Skopje</span>
+    <main class="relative z-10 flex flex-col items-center justify-center gap-8 w-full">
+      <Card className="bg-gray-800/80 border-gray-700 backdrop-blur-sm max-w-md w-full" client:load>
+        <CardContent className="p-8 text-center space-y-6">
+          <div>
+            <h1 class="text-3xl font-bold text-white mb-2">Blagojche Dimov</h1>
+            <div class="flex items-center justify-center gap-2 text-gray-300">
+              <GraduationCap className="h-4 w-4" />
+              <span class="text-sm">Computer Science Student</span>
+            </div>
           </div>
 
-          <div class="flex items-center gap-3 text-gray-300">
-            <Calendar className="h-4 w-4 text-green-400" />
-            <span class="text-sm">
-              Born March 29, 2002 ({age})
-            </span>
-          </div>
-        </div>
+          <div class="space-y-4">
+            <div class="flex items-center gap-3 text-gray-300">
+              <MapPin className="h-4 w-4 text-blue-400" />
+              <span class="text-sm">FCSE, Skopje</span>
+            </div>
 
-        <div class="space-y-3">
-            <a href="mailto:dimov_baze11@yahoo.com" class={buttonClasses}>
-              <Mail className="h-4 w-4" />
-              dimov_baze11@yahoo.com
-            </a>
-            <a
-              href="https://github.com/Baze-cmd"
-              target="_blank"
-              rel="noopener noreferrer"
-              class={buttonClasses}
-            >
-              <Github className="h-4 w-4" />
-              github.com/Baze-cmd
-            </a>
+            <div class="flex items-center gap-3 text-gray-300">
+              <Calendar className="h-4 w-4 text-green-400" />
+              <span class="text-sm">
+                Born March 29, 2002 ({age})
+              </span>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+              <a href="mailto:dimov_baze11@yahoo.com" class={buttonClasses}>
+                <Mail className="h-4 w-4" />
+                dimov_baze11@yahoo.com
+              </a>
+              <a
+                href="https://github.com/Baze-cmd"
+                target="_blank"
+                rel="noopener noreferrer"
+                class={buttonClasses}
+              >
+                <Github className="h-4 w-4" />
+                github.com/Baze-cmd
+              </a>
+          </div>
+        </CardContent>
+      </Card>
+
+      {services.length > 0 && (
+        <div class="max-w-md w-full">
+          <h2 class="text-2xl font-bold text-white text-center mb-4">Currently live apps</h2>
+          <Card className="bg-gray-800/80 border-gray-700 backdrop-blur-sm w-full">
+            <CardContent className="p-6 space-y-4">
+              {services.map((service, index) => (
+                <>
+                  <div class="flex items-center justify-between">
+                    <a href={service.SERVICE_DOMAIN} target="_blank" rel="noopener noreferrer" class="text-xl font-semibold text-white hover:underline">
+                      {service.SERVICE_NAME}
+                    </a>
+                    <span class:list={[
+                      "px-2 py-1 rounded-full text-xs font-bold",
+                      service.status === 'running' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'
+                    ]}>
+                      {service.status === 'running' ? 'LIVE' : service.status}
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-300">{service.SERVICE_DESCRIPTION}</p>
+                  {index < services.length - 1 && <hr class="border-gray-700" />}
+                </>
+              ))}
+            </CardContent>
+          </Card>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </main>
   </div>
 </Layout>

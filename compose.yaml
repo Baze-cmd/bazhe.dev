@@ -3,8 +3,7 @@ services:
     image: bazhe.dev
     container_name: bazhe.dev
     build: .
-    ports:
-      - "8765:5678"
+    network_mode: "host"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5678/health"]
       interval: 30s
@@ -17,4 +16,5 @@ services:
       SERVICE_DESCRIPTION: "${SERVICE_DESCRIPTION}"
       SERVICE_TYPE: "${SERVICE_TYPE}"
       SERVICE_DOMAIN: "${SERVICE_DOMAIN}"
+      PUBLIC_API_URL: "${PUBLIC_API_URL}"
     restart: unless-stopped
