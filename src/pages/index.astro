@@ -1,64 +1,140 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { buttonVariants } from '@/components/ui/button.tsx';
 import { cn } from '@/lib/utils.ts';
 import { Github, Mail, MapPin, Calendar, GraduationCap } from 'lucide-react';
 
-const age = new Date().getFullYear() - 2002 - (new Date().getMonth() < 2 || (new Date().getMonth() === 2 && new Date().getDate() < 29) ? 1 : 0);
+const age =
+    new Date().getFullYear() -
+    2002 -
+    (new Date().getMonth() < 2 || (new Date().getMonth() === 2 && new Date().getDate() < 29)
+        ? 1
+        : 0);
 
 const buttonClasses = cn(
-  buttonVariants({ variant: "outline" }),
-  "w-full bg-gray-700/50 border-gray-600 text-white hover:bg-gray-600 flex items-center gap-2"
+    buttonVariants({ variant: 'outline' }),
+    'w-full bg-gray-700/50 border-gray-600 text-white hover:bg-gray-600 flex items-center gap-2'
 );
+
+const domains = ['https://bazhe.dev', 'https://chess.bazhe.dev'];
+
+const services = await Promise.all(
+    domains.map(async (domain) => {
+        try {
+            const response = await fetch(`${domain}/api/info`);
+            if (response.ok) {
+                return await response.json();
+            }
+        } catch (error) {
+            console.error(`Failed to fetch info for ${domain}:`, error);
+        }
+        return null;
+    })
+).then((results) => results.filter(Boolean));
 ---
 
 <Layout title="bazhe.dev">
-  <div class="min-h-screen bg-gray-900 relative overflow-hidden flex items-center justify-center p-4">
-    <div class="absolute inset-0 opacity-20">
-      <div class="grid-background"></div>
-    </div>
-
-    <Card className="relative z-10 bg-gray-800/80 border-gray-700 backdrop-blur-sm max-w-md w-full" client:load>
-      <CardContent className="p-8 text-center space-y-6">
-        <div>
-          <h1 class="text-3xl font-bold text-white mb-2">Blagojche Dimov</h1>
-          <div class="flex items-center justify-center gap-2 text-gray-300">
-            <GraduationCap className="h-4 w-4" />
-            <span class="text-sm">Computer Science Student</span>
-          </div>
+    <div
+        class="min-h-screen bg-gray-900 relative overflow-hidden flex items-center justify-center p-4"
+    >
+        <div class="absolute inset-0 opacity-20">
+            <div class="grid-background"></div>
         </div>
 
-        <div class="space-y-4">
-          <div class="flex items-center gap-3 text-gray-300">
-            <MapPin className="h-4 w-4 text-blue-400" />
-            <span class="text-sm">FCSE, Skopje</span>
-          </div>
-
-          <div class="flex items-center gap-3 text-gray-300">
-            <Calendar className="h-4 w-4 text-green-400" />
-            <span class="text-sm">
-              Born March 29, 2002 ({age})
-            </span>
-          </div>
-        </div>
-
-        <div class="space-y-3">
-            <a href="mailto:dimov_baze11@yahoo.com" class={buttonClasses}>
-              <Mail className="h-4 w-4" />
-              dimov_baze11@yahoo.com
-            </a>
-            <a
-              href="https://github.com/Baze-cmd"
-              target="_blank"
-              rel="noopener noreferrer"
-              class={buttonClasses}
+        <div class="flex flex-wrap gap-4 justify-center">
+            <Card
+                className="relative z-10 bg-gray-800/80 border-gray-700 backdrop-blur-sm max-w-lg w-full"
+                client:load
             >
-              <Github className="h-4 w-4" />
-              github.com/Baze-cmd
-            </a>
+                <CardContent className="p-8 text-center space-y-6">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">Blagojche Dimov</h1>
+                        <div class="flex items-center justify-center gap-2 text-gray-300">
+                            <GraduationCap className="h-4 w-4" />
+                            <span class="text-sm">Computer Science Student</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <MapPin className="h-4 w-4 text-blue-400" />
+                            <span class="text-sm">FCSE, Skopje</span>
+                        </div>
+
+                        <a href="mailto:dimov_baze11@yahoo.com" class={buttonClasses}>
+                            <Mail className="h-4 w-4" />
+                            <span class="text-xs">Email</span>
+                        </a>
+
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <Calendar className="h-4 w-4 text-green-400" />
+                            <span class="text-sm">
+                                Born March 29, 2002 ({age})
+                            </span>
+                        </div>
+
+                        <a
+                            href="https://github.com/Baze-cmd"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={buttonClasses}
+                        >
+                            <Github className="h-4 w-4" />
+                            <span class="text-xs">GitHub</span>
+                        </a>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card
+                className="relative z-10 bg-gray-800/80 border-gray-700 backdrop-blur-sm max-w-lg w-full"
+            >
+                <CardHeader>
+                    <CardTitle className="text-white text-center">Currently live apps</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ul class="space-y-3 divide-y divide-gray-700">
+                        {
+                            services.map((service) => (
+                                <li class="text-white pt-3 first:pt-0">
+                                    <div class="flex justify-between items-center gap-4">
+                                        <div class="flex-1">
+                                            <a
+                                                href={service.domain}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="hover:underline font-medium text-base"
+                                            >
+                                                {service.name}
+                                            </a>
+                                            <p class="text-gray-400 mt-1">{service.description}</p>
+                                        </div>
+                                        <a
+                                            href={service.domain}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="text-green-400 font-mono shrink-0 hover:text-green-300 transition-colors text-sm"
+                                        >
+                                            {new URL(service.domain).hostname}
+                                        </a>
+                                    </div>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                </CardContent>
+            </Card>
         </div>
-      </CardContent>
-    </Card>
-  </div>
+    </div>
 </Layout>
+
+<style>
+    .grid-background {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 2rem 2rem;
+    }
+</style>
